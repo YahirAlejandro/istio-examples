@@ -1,0 +1,43 @@
+# Namespace needs to be labeled for sidecar injection!
+# Application deployment + service + labeled namespace
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-istio
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  namespace: nginx-istio
+  labels:
+    svc: nginx-svc
+spec:
+  ports:
+    - port: 80
+      name: http
+  selector:
+    app: nginx
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: nginx-istio
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+        version: v1
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        ports:
+        - containerPort: 80
